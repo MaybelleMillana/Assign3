@@ -1,25 +1,15 @@
 <?php
-
 class Player {
     private $conn;
-    private $table_name = "players";
+    private $table = "player";
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    public function getAllPlayers() {
-        $query = "SELECT * FROM " . $this->table_name;
-        $stmt = $this->conn->prepare($query);
+    public function getAll() {
+        $stmt = $this->conn->prepare("SELECT * FROM $this->table");
         $stmt->execute();
-        return $stmt;
-    }
-
-    public function addPlayer($first_name, $last_name, $email, $date_of_birth) {
-        $query = "INSERT INTO " . $this->table_name . " (first_name, last_name, email, date_of_birth) VALUES (?, ?, ?, ?)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([$first_name, $last_name, $email, $date_of_birth]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-?>
-
