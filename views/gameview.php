@@ -117,7 +117,7 @@ $games = $gameModel->getAll();
     </style>
 </head>
 <body>
-<?php include_once "header.php"; ?>
+<?php include __DIR__ . '/header.php'; ?>
 
 
     <div class="container">

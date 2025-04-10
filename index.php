@@ -46,7 +46,10 @@
 </head>
 <body>
 <!-- index.php -->
-<?php include('views/header.php'); ?>
+<header>
+    <h1>G2P Allocation System</h1>
+
+</header>
 <!-- Your page content here -->
     <div class="container">
         <a href="views/gameview.php" class="btn">Game Category</a>
