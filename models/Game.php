@@ -41,6 +41,10 @@ class Game {
 
     // UPDATE
     public function update() {
+
+    //echo $this->gameId;
+    //echo $this->table;
+    //echo $this->numberRounds;
         $query = "UPDATE " . $this->table . " 
                   SET gameName = :gameName, numberRounds = :numberRounds, totalCompletionTime = :totalCompletionTime 
                   WHERE gameId = :gameId";

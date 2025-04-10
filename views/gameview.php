@@ -2,8 +2,15 @@
 include_once "../config/Database.php";
 include_once "../models/Game.php";
 
+
+$editMode = false;
+$editGame = null;
+
+
 $db = (new Database())->getConnection();
 $gameModel = new Game($db);
+
+
 
 // Handle form submission
 $message = "";
@@ -17,6 +24,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_game'])) {
     } else {
         $message = "Error adding game.";
     }
+}
+// Handle update
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_game'])) {
+    $gameModel->gameId = $_POST['gameId'];  // Ensure gameId is included
+    $gameModel->gameName = $_POST['gameName'];
+    $gameModel->numberRounds = $_POST['numberRounds'];
+    $gameModel->totalCompletionTime = $_POST['totalCompletionTime'];
+
+    if ($gameModel->update()) {
+        $message = "Game updated successfully!";
+    } else {
+        $message = "Error updating game.";
+    }
+}
+// Handle delete
+if (isset($_GET['delete_id'])) {
+    if ($gameModel->delete($_GET['delete_id'])) {
+        $message = "Game deleted.";
+    } else {
+        $message = "Error deleting game.";
+    }
+}
+
+// Check if edit button was clicked
+if (isset($_GET['edit_id'])) {
+    $editMode = true;
+    $editGame = $gameModel->getById($_GET['edit_id']);
 }
 
 // Fetch all games
@@ -123,17 +157,25 @@ $games = $gameModel->getAll();
     <div class="container">
         <h2>Game Section</h2>
         <form method="post">
-            <label>Game Name:</label>
-            <input type="text" name="gameName" required placeholder="Enter the Game Name">
+    <?php if ($editMode): ?>
+        <input type="hidden" name="gameId" value="<?= $editGame['gameId'] ?>">
+    <?php endif; ?>
 
-            <label>Number of Rounds:</label>
-            <input type="number" name="numberRounds" required placeholder="Enter the count">
+    <label>Game Name:</label>
+    <input type="text" name="gameName" required value="<?= $editMode ? htmlspecialchars($editGame['gameName']) : '' ?>">
 
-            <label>Total Completion Time:</label>
-            <input type="text" name="totalCompletionTime" required placeholder="Enter the completion time">
+    <label>Number of Rounds:</label>
+    <input type="number" name="numberRounds" required value="<?= $editMode ? htmlspecialchars($editGame['numberRounds']) : '' ?>">
 
-            <button type="submit" name="add_game" class="btn btn-add">Add Game</button>
-        </form>
+    <label>Total Completion Time:</label>
+    <input type="text" name="totalCompletionTime" required value="<?= $editMode ? htmlspecialchars($editGame['totalCompletionTime']) : '' ?>">
+
+    <?php if ($editMode): ?>
+        <button type="submit" name="update_game" class="btn btn-add">Update Game</button>
+    <?php else: ?>
+        <button type="submit" name="add_game" class="btn btn-add">Add Game</button>
+    <?php endif; ?>
+</form>
 
         <?php if ($message): ?>
             <p class="message"><?= $message ?></p>
@@ -141,18 +183,23 @@ $games = $gameModel->getAll();
 
         <h3>Games Available</h3>
         <table>
-            <tr>
-                <th>Game ID</th>
-                <th>Game Name</th>
-                <th>Number of Rounds</th>
-                <th>Total Completion Time</th>
-            </tr>
+        <tr>
+            <th>Game ID</th>
+            <th>Game Name</th>
+            <th>Number of Rounds</th>
+            <th>Total Completion Time</th>
+            <th>Actions</th>
+        </tr>
             <?php foreach ($games as $game): ?>
                 <tr>
                     <td><?= $game['gameId'] ?></td>
                     <td><?= $game['gameName'] ?></td>
                     <td><?= $game['numberRounds'] ?></td>
                     <td><?= $game['totalCompletionTime'] ?></td>
+                    <td>
+                        <a href="?edit_id=<?= $game['gameId'] ?>" class="btn ">Edit</a>
+                        <a href="?delete_id=<?= $game['gameId'] ?>" class="btn " onclick="return confirm('Are you sure?')">Delete</a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </table>
